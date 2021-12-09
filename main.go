@@ -13,9 +13,9 @@ import (
 )
 
 type Collector struct {
-	latest_block_height   *prometheus.Desc
-	latest_block_time_lag *prometheus.Desc
-	number_of_peers       *prometheus.Desc
+	latestBlockHeight  *prometheus.Desc
+	latestBlockTimeLag *prometheus.Desc
+	numberOfPeers      *prometheus.Desc
 }
 
 type Status struct {
@@ -50,16 +50,16 @@ func getJson(url string, target *Root) error {
 
 func gaiaCollector() *Collector {
 	return &Collector{
-		latest_block_height:   prometheus.NewDesc("gaia_latest_block_height", "The latest block height", nil, nil),
-		latest_block_time_lag: prometheus.NewDesc("gaia_latest_block_time_lag", "Delta in seconds between localtime and latest block time", nil, nil),
-		number_of_peers:       prometheus.NewDesc("gaia_number_of_peers", "Number of peers", nil, nil),
+		latestBlockHeight:  prometheus.NewDesc("gaia_latest_block_height", "The latest block height", nil, nil),
+		latestBlockTimeLag: prometheus.NewDesc("gaia_latest_block_time_lag", "Delta in seconds between localtime and latest block time", nil, nil),
+		numberOfPeers:      prometheus.NewDesc("gaia_number_of_peers", "Number of peers", nil, nil),
 	}
 }
 
 func (c *Collector) Describe(ch chan<- *prometheus.Desc) {
-	ch <- c.latest_block_height
-	ch <- c.latest_block_time_lag
-	ch <- c.number_of_peers
+	ch <- c.latestBlockHeight
+	ch <- c.latestBlockTimeLag
+	ch <- c.numberOfPeers
 }
 
 func (c *Collector) Collect(ch chan<- prometheus.Metric) {
@@ -86,11 +86,11 @@ func (c *Collector) Collect(ch chan<- prometheus.Metric) {
 
 	lag := time.Now().Sub(t)
 	latestBlockHeight, err := strconv.Atoi(responseStatus.Result.SyncInfo.LatestBlockHeight)
-	number_of_peers, err := strconv.Atoi(responseNPeers.Result.NPeers)
+	numberOfPeers, err := strconv.Atoi(responseNPeers.Result.NPeers)
 
-	ch <- prometheus.MustNewConstMetric(c.latest_block_height, prometheus.GaugeValue, float64(latestBlockHeight))
-	ch <- prometheus.MustNewConstMetric(c.latest_block_time_lag, prometheus.GaugeValue, lag.Seconds())
-	ch <- prometheus.MustNewConstMetric(c.number_of_peers, prometheus.GaugeValue, float64(number_of_peers))
+	ch <- prometheus.MustNewConstMetric(c.latestBlockHeight, prometheus.GaugeValue, float64(latestBlockHeight))
+	ch <- prometheus.MustNewConstMetric(c.latestBlockTimeLag, prometheus.GaugeValue, lag.Seconds())
+	ch <- prometheus.MustNewConstMetric(c.numberOfPeers, prometheus.GaugeValue, float64(numberOfPeers))
 }
 
 func main() {
